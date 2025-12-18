@@ -32,8 +32,8 @@ class Category(models.Model):
 
 class Products(models.Model):
     id = models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
-    created_by = models.ForeignKey(KatakaraUser, on_delete= models.CASCADE)
-    name = models.CharField(max_length= 200, unique= True)
+    user = models.ForeignKey(KatakaraUser, on_delete= models.CASCADE)
+    name = models.CharField(max_length= 200)
     description= models.TextField(max_length= 500)
     category= models.ManyToManyField(Category)
     price = models.DecimalField(max_digits= 10, decimal_places= 2)
@@ -42,7 +42,7 @@ class Products(models.Model):
 
 class Review(models.Model):
     id = models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
-    created_by = models.ForeignKey(KatakaraUser, on_delete= models.CASCADE)
+    user = models.ForeignKey(KatakaraUser, on_delete= models.CASCADE)
     product = models.ForeignKey(Products, on_delete= models.CASCADE)
     rating = models.IntegerField()
     comment = models.TextField()

@@ -56,7 +56,6 @@ class KatakaraUser(AbstractUser):
     last_name= models.CharField(max_length= 50)
     email= models.EmailField(unique= True)
     role= models.ManyToManyField(Role)
-    is_active= models.BooleanField(default= True)
 
     objects= KatakaraBaseUserManager()
 
