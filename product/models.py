@@ -6,7 +6,7 @@ from katakara_auth.models import KatakaraUser
 
 class Category(models.Model):
     CATEGORY_NAMES = [
-        ("general", "General")
+        ("general", "General"),
         ("electronics-and-technology", "Electronics & Technology"),
         ("fashion-and-beauty", "Fashion & Beauty"),
         ("home-and-living", "Home & Living"),
@@ -38,6 +38,7 @@ class Products(models.Model):
     category= models.ManyToManyField(Category)
     price = models.DecimalField(max_digits= 10, decimal_places= 2)
     quantity= models.IntegerField(default=0)
+    is_approved = models.BooleanField(default= False)
     created_at= models.DateTimeField(auto_now_add= True)
 
 class Review(models.Model):

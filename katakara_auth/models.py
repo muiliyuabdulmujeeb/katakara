@@ -18,7 +18,7 @@ class Role(models.Model):
 
 class KatakaraBaseUserManager(BaseUserManager):
     """User manager to create user using first_name, last_name, email and password"""
-    def create_user(self, first_name, last_name, email, password, is_active=True, **extra_fields):
+    def create_user(self, first_name, last_name, email, password, **extra_fields):
 
         if not first_name:
             raise ValueError("First name cannot be blank")
@@ -31,7 +31,6 @@ class KatakaraBaseUserManager(BaseUserManager):
             first_name= first_name,
             last_name= last_name,
             email= self.normalize_email(email=email),
-            is_active= is_active,
             **extra_fields
         )
         user.set_password(password)
@@ -56,6 +55,7 @@ class KatakaraUser(AbstractUser):
     last_name= models.CharField(max_length= 50)
     email= models.EmailField(unique= True)
     role= models.ManyToManyField(Role)
+    bio= models.CharField(max_length= 200, null= True)
 
     objects= KatakaraBaseUserManager()
 
