@@ -11,6 +11,14 @@ class UserCart(models.Model):
     session_key = models.CharField(max_length= 40, null= True, blank= True)
     created_at = models.DateTimeField(auto_now_add= True)
 
+
+    class Meta:
+        permissions = [
+            ("clear_cart", "can clear cart"),
+            ("add_item_to_cart", "can add item to cart"),
+            ("remove_item_from_cart", "can remove item from cart")
+        ]
+
 class CartItems(models.Model):
     id = models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
     cart_id = models.ForeignKey(UserCart, on_delete= models.CASCADE)

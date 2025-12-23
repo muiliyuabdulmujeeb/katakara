@@ -64,6 +64,20 @@ class KatakaraUser(AbstractUser):
 
     def __str__(self):
         return self.get_full_name()
+    
+    class Meta:
+        permissions = [
+            ("user_account_detail", "can view self account details"),
+            ("user_account_update", "can update account details"),
+            ("user_role_update", "can update account role"),        #needs approval from admin(for buyer or seller) or superadmin(for admin)
+            ("user_activate_account", "can activate self account"),
+            ("user_decativate_account", "can deactivate self account"),
+            ("user_change_password", "can change password"),
+            ("user_list_accounts", "can view all users"),           #only buyers and sellers for admin and all users for superadmin
+            ("user_approve_role", "can approve role for user"),     #buyers and sellers for admin and buyer, seller, admin and superadmin for superadmin
+            ("user_ban_account", "can ban account"),
+            ("user_unban_account", "can unban account"),
+        ]
 
 class BlacklistedTokens(models.Model):
     id= models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)

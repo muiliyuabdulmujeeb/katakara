@@ -8,12 +8,12 @@ from purchase.models import Order
 
 class Disputes(models.Model):
     DISPUTE_STATUS = [
-        ("resolved", "Resolved"),
-        ("escalated", "Escalated"),
-        ("pending", "Pending"),
-        ("cancelled", "Cancelled"),
-        ("acknowledged", "Acknowledged"),
-        ("action_taken", "Action taken")
+        ("resolved", "Resolved"),       #by the admin or buyer
+        ("escalated", "Escalated"),     #by the buyer or seller
+        ("pending", "Pending"),         #default value
+        ("cancelled", "Cancelled"),     #by the buyer or admin
+        ("acknowledged", "Acknowledged"),          #by the seller
+        ("action_taken", "Action taken")    #by the seller
     ]
     id= models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
     user= models.ForeignKey(KatakaraUser, on_delete= models.SET_NULL, null= True, blank= True)
@@ -28,3 +28,17 @@ class Disputes(models.Model):
     acknowledged_at = models.DateTimeField(null= True)
     resolved_at = models.DateTimeField(null= True)
     escalated_at = models.DateTimeField(null= True)
+
+    class Meta:
+        permissions = [
+            ("create_dispute", "can create dispute"),
+            ("view_self_disputes", "can view self disputes"),
+            ("cancel_dispute", "can cancel dispute"),
+            ("escalate_dispute", "can escalate dispute"),
+            ("satisfy_dispute", "can get satisfied by the dispute"),     #buyer only permission that changes status to resolved
+            ("acknowledge_dispute", "can acknowledge disputes"),
+            ("respond_to_dispute", "can respond to dispute"),
+            ("resolve_dispute", "can resolve dispute"),
+            ("view_escalated_disputes", "can view escalated disputes"),
+            ("resolve_escalated_disputes", "can resolve escalated disputes")
+        ]

@@ -41,10 +41,31 @@ class Products(models.Model):
     is_approved = models.BooleanField(default= False)
     created_at= models.DateTimeField(auto_now_add= True)
 
-class Review(models.Model):
+    class Meta:
+        permissions = [
+            ("list_products", "list all products"),
+            ("list_approved_products", "list only approved products"),
+            ("list_unapproved_products", "list only unapproved products"),
+            ("view_product_details", "view the details of a product"),
+            ("create_product", "can create product"),
+            ("update_product_details", "can update product details"),
+            ("approve_product", "can approve products"),
+            ("disprove_product", "can disprove products"),
+
+        ]
+
+class Review(models.Model):             #one user should be able to review a product only once
     id = models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
     user = models.ForeignKey(KatakaraUser, on_delete= models.CASCADE)
     product = models.ForeignKey(Products, on_delete= models.CASCADE)
     rating = models.IntegerField()
     comment = models.TextField()
     created_at= models.DateTimeField(auto_now_add= True)
+
+    class Meta:
+        permissions = [
+            ("review_product", "can review a product"),     #can only review a product if they purchased the product
+            ("edit review", "can edit self review"),
+            ("view_reviews", "can view all reviews for a product"),
+            ("delete_any_review", "can delete any product review"),
+        ]
