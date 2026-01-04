@@ -79,14 +79,6 @@ class KatakaraUser(AbstractUser):
             ("user_unban_account", "can unban account"),
         ]
 
-class BlacklistedTokens(models.Model):
-    id= models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
-    user= models.ForeignKey(KatakaraUser, on_delete= models.CASCADE)
-    token= models.CharField(max_length= 50)
-
-
-    def __str__(self):
-        return self.user__email
     
 class BannedUser(models.Model):
     id= models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
