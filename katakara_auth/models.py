@@ -1,4 +1,5 @@
 import uuid
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser, BaseUserManager
@@ -50,17 +51,20 @@ class KatakaraBaseUserManager(BaseUserManager):
         return user
 
 class KatakaraUser(AbstractUser):
-    id= models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
-    first_name= models.CharField(max_length= 50)
-    last_name= models.CharField(max_length= 50)
-    email= models.EmailField(unique= True)
-    role= models.ManyToManyField(Role)
-    bio= models.CharField(max_length= 200, null= True)
+    username = None 
 
-    objects= KatakaraBaseUserManager()
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    role = models.ManyToManyField(Role)
+    bio = models.CharField(max_length=200, null=True)
 
-    USERNAME_FIELD= "email"
-    REQUIRED_FIELDS= ["first_name", "last_name", "password"]
+    objects = KatakaraBaseUserManager()
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["first_name", "last_name"]
+
 
     def __str__(self):
         return self.get_full_name()
@@ -85,3 +89,32 @@ class BannedUser(models.Model):
     user= models.ForeignKey(KatakaraUser, on_delete= models.CASCADE)
     banned_at= models.DateTimeField(auto_now_add= True)
     expires_at= models.DateTimeField(default= get_banned_user_expires_at)
+
+
+class RoleUpgradeRequest(models.Model):
+    class RoleChoices(models.TextChoices):
+        BUYER = "buyer", "Buyer"
+        SELLER = "seller", "Seller"
+
+    class StatusChoices(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="role_requests")
+    requested_role = models.CharField(max_length=20, choices=RoleChoices.choices)
+    status = models.CharField(max_length=20, choices=StatusChoices.choices, default=StatusChoices.PENDING)
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True, related_name="reviewed_role_requests")
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "requested_role", "status"],
+                condition=models.Q(status="pending"),
+                name="unique_pending_role_request"
+            )
+        ]
