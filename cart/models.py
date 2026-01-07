@@ -1,7 +1,7 @@
 from django.db import models
 import uuid
 from katakara_auth.models import KatakaraUser
-from product.models import Products
+from product.models import Product
 
 # Create your models here.
 
@@ -20,9 +20,12 @@ class UserCart(models.Model):
         ]
 
 class CartItems(models.Model):
-    id = models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
-    cart_id = models.ForeignKey(UserCart, on_delete= models.CASCADE)
-    product_id = models.ForeignKey(Products, on_delete= models.CASCADE)
-    price = models.DecimalField(max_digits= 10, decimal_places= 2)
-    quantity = models.IntegerField(default= 1)
-    created_at = models.DateTimeField(auto_now_add= True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    cart = models.ForeignKey(UserCart, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("cart", "product")
