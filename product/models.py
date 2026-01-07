@@ -5,32 +5,22 @@ from katakara_auth.models import KatakaraUser
 # Create your models here.
 
 class Category(models.Model):
-    CATEGORY_NAMES = [
-        ("general", "General"),
-        ("electronics-and-technology", "Electronics & Technology"),
-        ("fashion-and-beauty", "Fashion & Beauty"),
-        ("home-and-living", "Home & Living"),
-        ("sports-and-outdoors", "Sports & Outdoors"),
-        ("health-and-personal-care", "Health & Personal Care"),
-        ("baby-kids-and-toys", "Baby Kids & Toys"),
-        ("groceries-and-essentials", "Groceries & Essentials"),
-        ("automotive-and-industrial", "Automotive & Industrial"),
-        ("books-and-stationery", "Books & Stationery"),
-        ("gaming-and-entertainment", "Gaming & Entertainment"),
-        ("pet-supplies", "Pet Supplies"),
-        ("office-and-business", "Office & Business"),
-        ("art-and-craft", "Art & Craft"),
-        ("jewelry-and-accessories", "Jewelry & Accessories"),
-        ("appliances", "Appliances"),
-        ("hardware-and-diy", "Hardware & DIY"),
-        ("music-and-instruments", "Music & Instruments")
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(unique=True, default="")
+    is_active = models.BooleanField(default=True)
 
-    ]
+class Product(models.Model):
 
-    id = models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
-    name = models.CharField(max_length= 200, choices= CATEGORY_NAMES, default= "general")
+    STATUS_CHOICES = [
+        ("pending", "Pending Approval"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+        ("blacklisted", "Blacklisted"),
+        ("deleted", "Deleted"),
+]
 
-class Products(models.Model):
+
     id = models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
     user = models.ForeignKey(KatakaraUser, on_delete= models.CASCADE)
     name = models.CharField(max_length= 200)
@@ -38,7 +28,7 @@ class Products(models.Model):
     category= models.ManyToManyField(Category)
     price = models.DecimalField(max_digits= 10, decimal_places= 2)
     quantity= models.IntegerField(default=0)
-    is_approved = models.BooleanField(default= False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at= models.DateTimeField(auto_now_add= True)
 
     class Meta:
@@ -54,18 +44,19 @@ class Products(models.Model):
 
         ]
 
-class Review(models.Model):             #one user should be able to review a product only once
+class Review(models.Model):
     id = models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
     user = models.ForeignKey(KatakaraUser, on_delete= models.CASCADE)
-    product = models.ForeignKey(Products, on_delete= models.CASCADE)
+    product = models.ForeignKey(Product, on_delete= models.CASCADE)
     rating = models.IntegerField()
     comment = models.TextField()
     created_at= models.DateTimeField(auto_now_add= True)
 
     class Meta:
+        unique_together = ("user", "product")               #one user should be able to review a product only once
         permissions = [
             ("review_product", "can review a product"),     #can only review a product if they purchased the product
-            ("edit review", "can edit self review"),
+            ("edit_review", "can edit self review"),
             ("view_reviews", "can view all reviews for a product"),
             ("delete_any_review", "can delete any product review"),
         ]
