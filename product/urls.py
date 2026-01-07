@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import AdminProductListView, ApproveProductView, CreateProductView, ProductDeleteView, ProductDetailView, ProductListView, ProductUpdateView, RejectProductView, CreateProductCategoryView
+from .views import AdminProductListView, ApproveProductView, BlacklistProductView, CreateProductView, ProductDeleteView, ProductDetailView, ProductListView, ProductUpdateView, RejectProductView, CreateProductCategoryView
 
 urlpatterns = [
     path("products/", CreateProductView.as_view(), name="create-product"),
@@ -11,5 +11,7 @@ urlpatterns = [
     path("admin/products/<uuid:id>/approve/", ApproveProductView.as_view(), name="product-approve"),
     path("admin/products/<uuid:id>/reject/", RejectProductView.as_view(), name="product-reject"),
     path("admin/products/category", CreateProductCategoryView.as_view(), name= "create-product-category"),
+    path("admin/products/<uuid:id>/blacklist/", BlacklistProductView.as_view(), name="product-blacklist"),
+
 
 ]

@@ -159,3 +159,23 @@ class RejectProductView(APIView):
 class CreateProductCategoryView(CreateAPIView):
     permission_classes = [IsAdminOrSuperAdmin]
     serializer_class = CreateProductCategorySerializer
+
+
+class BlacklistProductView(APIView):
+    permission_classes = [IsAdminOrSuperAdmin]
+
+    def post(self, request, id):
+        product = get_object_or_404(Product, id=id)
+
+        serializer = ProductModerationSerializer(
+            product,
+            data={},
+            context={"new_status": "blacklisted"}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {"detail": "Product has been blacklisted."},
+            status=status.HTTP_200_OK
+        )

@@ -180,13 +180,21 @@ class ProductModerationSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         product = self.instance
+        new_status = self.context.get("new_status")
 
-        if product.status != "pending":
+        if new_status == "blacklisted":
+            if product.status != "approved":
+                raise serializers.ValidationError(
+                    "Only approved products can be blacklisted."
+                )
+
+        elif product.status != "pending":
             raise serializers.ValidationError(
-                "Only pending products can be updated."
+                "Only pending products can be moderated."
             )
 
         return attrs
+
 
     def update(self, instance, validated_data):
         new_status = self.context.get("new_status")
