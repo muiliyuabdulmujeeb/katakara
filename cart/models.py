@@ -7,12 +7,17 @@ from product.models import Product
 
 class UserCart(models.Model):
     id = models.UUIDField(primary_key= True, default= uuid.uuid4, editable= False)
-    user = models.OneToOneField(KatakaraUser, on_delete= models.SET_NULL, null= True, blank= True)
+    user = models.ForeignKey(KatakaraUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="carts")
     session_key = models.CharField(max_length= 40, null= True, blank= True)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add= True)
 
 
     class Meta:
+        constraints = [
+        models.UniqueConstraint(fields=["user"], condition=models.Q(is_active=True), name="one_active_cart_per_user"),
+        models.UniqueConstraint(fields=["session_key"], condition=models.Q(is_active=True), name="one_active_cart_per_session")
+    ]
         permissions = [
             ("clear_cart", "can clear cart"),
             ("add_item_to_cart", "can add item to cart"),
@@ -23,6 +28,7 @@ class CartItems(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     cart = models.ForeignKey(UserCart, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    seller = models.ForeignKey(KatakaraUser, on_delete=models.SET_NULL, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
