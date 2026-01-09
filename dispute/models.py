@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from katakara_auth.models import KatakaraUser
-from product.models import Products
+from product.models import Product
 from purchase.models import Order
 
 # Create your models here.
@@ -19,7 +19,7 @@ class Disputes(models.Model):
     user= models.ForeignKey(KatakaraUser, on_delete= models.SET_NULL, null= True, blank= True)
     session_key= models.CharField(max_length= 40, null= True, blank= True)
     order= models.ForeignKey(Order, on_delete= models.RESTRICT, null= True, blank= True)
-    product= models.ForeignKey(Products, on_delete= models.RESTRICT, null= True, blank= True)
+    product= models.ForeignKey(Product, on_delete= models.RESTRICT, null= True, blank= True)
     title= models.CharField(max_length= 50)
     description= models.TextField()
     status = models.CharField(choices= DISPUTE_STATUS, default= "pending")
