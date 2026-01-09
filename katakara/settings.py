@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'environ',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'corsheaders'
+    'corsheaders',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -153,6 +154,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
@@ -170,3 +172,24 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True  # dev only
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Katakara API',
+    'DESCRIPTION': 'Katakara is a multi-vendor commerce platform with carts, orders, payments, disputes, and role-based access control.',
+    'VERSION': '1.0.0',
+
+    # Serve schema without auth
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+
+    # JWT support
+    'COMPONENT_SPLIT_REQUEST': True,
+
+    'SECURITY': [{'bearerAuth': []}],
+    'SECURITY_DEFINITIONS': {
+        'bearerAuth': {
+            'type': 'http',
+            'scheme': 'bearer',
+            'bearerFormat': 'JWT',
+        }
+    },
+}

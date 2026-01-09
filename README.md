@@ -27,7 +27,7 @@ This project was **designed feature-by-feature from scratch**, with a strong emp
 - Django
 - Django Rest Framework
 - SimpleJWT (JWT Authentication)
-- PostgreSQL (recommended)
+- PostgreSQL
 - UUIDs for all primary keys
 
 ---
@@ -199,33 +199,25 @@ This design:
 
 ---
 
-## App Structure
+## App Documentation
+Katakara provides interactive API documentation via Swagger UI and Redoc.
 
-```
-katakara/
-│
-├── katakara_auth/
-│   ├── users, roles, auth, permissions
-│
-├── product/
-│   ├── categories, products, moderation
-│
-├── cart/
-│   ├── carts, cart items
-│
-├── purchase/
-│   ├── orders, order items, payments
-│
-└── core/
-    ├── shared utilities
-```
+- Swagger UI: `/schema/docs/`
+- OpenAPI schema: `/schema/`
+- Redoc schema: `/schema/redoc`
+
+This documentation allows developers to:
+- Inspect request/response formats
+- Test endpoints directly
+- View authentication requirements
+
 
 ---
 
 ## Setup Instructions
 
 ```bash
-git clone https://github.com/your-username/katakara.git
+git clone https://github.com/muiliyuabdulmujeeb/katakara.git
 cd katakara
 python -m venv venv
 source venv/bin/activate
@@ -240,10 +232,7 @@ python manage.py runserver
 ## Environment Variables
 
 ```env
-SECRET_KEY=
-DEBUG=
-DATABASE_URL=
-JWT_SIGNING_KEY=
+check .env.example file
 ```
 
 ---
@@ -277,10 +266,6 @@ JWT_SIGNING_KEY=
 - Keep serializers thin and intentional
 
 ---
-
-## License
-
-MIT License
 
 ---
 
