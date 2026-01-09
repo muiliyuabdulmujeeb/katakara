@@ -1,9 +1,12 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework import status
 
-from .serializers import CreateOrderFromCartSerializer, OrderListSerializer
+
+from .models import Order
+from .serializers import BuyerPaymentConfirmationSerializer, CreateOrderFromCartSerializer, OrderListSerializer, SellerConfirmPaymentSerializer, SellerRejectPaymentSerializer
 from .services import create_order_from_cart, delete_order, get_order_for_request, get_user_order_by_id, get_user_orders, initiate_payment, save_order
 
 
@@ -118,5 +121,101 @@ class InitiatePaymentView(APIView):
                 "detail": "Payment initiated. Awaiting payment.",
                 "order_status": order.status
             },
+            status=status.HTTP_200_OK
+        )
+    
+
+class ConfirmPaymentByBuyerAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+
+        # Ownership check
+        if order.user != request.user:
+            return Response(
+                {"detail": "You do not own this order."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = BuyerPaymentConfirmationSerializer(
+            data=request.data,
+            context={"order": order}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {
+                "message": "Payment marked as pending confirmation.",
+                "order_id": str(order.id),
+                "status": order.status,
+            },
+            status=status.HTTP_200_OK
+        )
+
+class ConfirmPaymentBySellerAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+
+        # Prevent buyer from confirming
+        if order.user == request.user:
+            return Response(
+                {"detail": "Buyers cannot confirm payments."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Seller ownership OR admin
+        is_admin = request.user.is_staff or request.user.is_superuser
+        is_seller = order.orderitems_set.filter(
+            product__user=request.user
+        ).exists()
+
+        if not (is_admin or is_seller):
+            return Response(
+                {"detail": "You are not authorized to confirm this payment."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = SellerConfirmPaymentSerializer(
+            data=request.data,
+            context={"order": order}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {"message": "Payment confirmed.", "status": order.status},
+            status=status.HTTP_200_OK
+        )
+
+class RejectPaymentBySellerAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+
+        is_admin = request.user.is_staff or request.user.is_superuser
+        is_seller = order.orderitems_set.filter(
+            product__user=request.user
+        ).exists()
+
+        if not (is_admin or is_seller):
+            return Response(
+                {"detail": "You are not authorized to reject this payment."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = SellerRejectPaymentSerializer(
+            data=request.data,
+            context={"order": order}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {"message": "Payment rejected.", "status": order.status},
             status=status.HTTP_200_OK
         )

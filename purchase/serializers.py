@@ -48,3 +48,58 @@ class OrderActionSerializer(serializers.Serializer):
 
 class InitiatePaymentSerializer(serializers.Serializer):
     order_id = serializers.UUIDField()
+
+class BuyerPaymentConfirmationSerializer(serializers.Serializer):
+    def validate(self, attrs):
+        order = self.context["order"]
+
+        if order.status != "awaiting_payment":
+            raise serializers.ValidationError(
+                "This order is not awaiting payment."
+            )
+
+        return attrs
+
+    def save(self):
+        order = self.context["order"]
+        order.status = "payment_pending"
+        order.save(update_fields=["status"])
+        return order
+
+
+class SellerConfirmPaymentSerializer(serializers.Serializer):
+    def validate(self, attrs):
+        order = self.context["order"]
+
+        if order.status != "payment_pending":
+            raise serializers.ValidationError(
+                "Order is not awaiting payment confirmation."
+            )
+
+        return attrs
+
+    def save(self):
+        order = self.context["order"]
+        order.status = "paid"
+        order.save(update_fields=["status"])
+        return order
+
+
+class SellerRejectPaymentSerializer(serializers.Serializer):
+    reason = serializers.CharField(required=False, allow_blank=True)
+
+    def validate(self, attrs):
+        order = self.context["order"]
+
+        if order.status != "payment_pending":
+            raise serializers.ValidationError(
+                "Order is not awaiting payment confirmation."
+            )
+
+        return attrs
+
+    def save(self):
+        order = self.context["order"]
+        order.status = "awaiting_payment"
+        order.save(update_fields=["status"])
+        return order

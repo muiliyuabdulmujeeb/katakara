@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CreateOrderFromCartView, DeleteOrderView, InitiatePaymentView, MyOrdersView, OrderDetailView, SaveOrderView
+from .views import ConfirmPaymentBySellerAPIView, CreateOrderFromCartView, DeleteOrderView, InitiatePaymentView, MyOrdersView, OrderDetailView, RejectPaymentBySellerAPIView, SaveOrderView, ConfirmPaymentByBuyerAPIView
 
 
 urlpatterns = [
@@ -9,4 +9,7 @@ urlpatterns = [
     path("orders/<uuid:order_id>/save/", SaveOrderView.as_view()),
     path("orders/<uuid:order_id>/delete/", DeleteOrderView.as_view()),
     path("orders/<uuid:order_id>/initiate-payment/", InitiatePaymentView.as_view()),
+    path("orders/<uuid:order_id>/confirm-payment/", ConfirmPaymentByBuyerAPIView.as_view(), name="buyer-confirm-payment"),
+    path("orders/<uuid:order_id>/confirm-payment-admin/", ConfirmPaymentBySellerAPIView.as_view(), name="seller-confirm-payment"),
+    path("orders/<uuid:order_id>/reject-payment/", RejectPaymentBySellerAPIView.as_view(), name="seller-reject-payment"),
 ]
