@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, render
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.contrib.auth.models import Group
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -8,9 +9,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from katakara_auth.models import RoleUpgradeRequest
-from .serializers import BanUserSerializer, EditProfileSerializer, ForgotPasswordSerializer, ResetPasswordSerializer, RoleUpgradeRequestCreateSerializer, RoleUpgradeRequestReviewSerializer, SignupSerializer, LogoutSerializer, CustomTokenObtainPairSerializer, CustomTokenRefreshSerializer, UnbanUserSerializer, UserProfileSerializer
-from .permissions import IsAdmin
+from .models import RoleUpgradeRequest, KatakaraUser, Role
+from .serializers import BanUserSerializer, EditProfileSerializer, ForgotPasswordSerializer, GrantAdminSerializer, ResetPasswordSerializer, RoleUpgradeRequestCreateSerializer, RoleUpgradeRequestReviewSerializer, SignupSerializer, LogoutSerializer, CustomTokenObtainPairSerializer, CustomTokenRefreshSerializer, UnbanUserSerializer, UserProfileSerializer
+from .permissions import IsAdmin, IsSuperAdmin
 
 
 # Create your views here.
@@ -200,4 +201,39 @@ class CancelRoleUpgradeRequestView(APIView):
         return Response(
             {"detail": "Role upgrade request cancelled."},
             status=status.HTTP_204_NO_CONTENT
+        )
+
+
+class SuperAdminGrantAdminView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    def post(self, request):
+        print("step 1")
+        serializer = GrantAdminSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        print("step 2")
+        user = serializer.validated_data["user_id"]
+
+        if user == request.user:
+            return Response(
+                {"detail": "You cannot modify your own roles."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        print("Step 3")
+        admin_role, _ = Role.objects.get_or_create(name="admin")
+
+        print("step 4")
+        try:
+            with transaction.atomic():
+                user.role.set([admin_role])
+        except IntegrityError as e:
+            raise Exception(f"ROLE ASSIGNMENT FAILED: {e}")
+
+
+        print("step 5")
+        return Response(
+            {"detail": f"All previous roles revoked. User {user.email} is now an admin."},
+            status=status.HTTP_200_OK
         )

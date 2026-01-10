@@ -12,7 +12,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import Token, RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-from .models import BannedUser, Role, RoleUpgradeRequest
+from .models import BannedUser, KatakaraUser, Role, RoleUpgradeRequest
 
 
 
@@ -324,3 +324,15 @@ class RoleUpgradeRequestCreateSerializer(serializers.ModelSerializer):
 
 class RoleUpgradeRequestReviewSerializer(serializers.Serializer):
     action = serializers.ChoiceField(choices=["approve", "reject"])
+
+
+
+
+class GrantAdminSerializer(serializers.Serializer):
+    user_id = serializers.UUIDField()
+
+    def validate_user_id(self, value):
+        try:
+            return KatakaraUser.objects.get(id=value)
+        except KatakaraUser.DoesNotExist:
+            raise serializers.ValidationError("User not found")

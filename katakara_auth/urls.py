@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import CancelRoleUpgradeRequestView, LoginView, PendingRoleUpgradeRequestsView, RequestRoleUpgradeView, ReviewRoleUpgradeRequestView, SignupView, LogoutView, TokenRefreshView, ForgotPasswordView, ResetPasswordView, UserProfileView, BanUserView, UnbanUserView
+from .views import CancelRoleUpgradeRequestView, LoginView, PendingRoleUpgradeRequestsView, RequestRoleUpgradeView, ReviewRoleUpgradeRequestView, SignupView, LogoutView, SuperAdminGrantAdminView, TokenRefreshView, ForgotPasswordView, ResetPasswordView, UserProfileView, BanUserView, UnbanUserView
 
 
 urlpatterns = [
@@ -24,4 +24,5 @@ urlpatterns = [
     path("roles/requests/", PendingRoleUpgradeRequestsView.as_view()),
     path("roles/requests/<uuid:pk>/review/", ReviewRoleUpgradeRequestView.as_view()),
     path("roles/requests/<uuid:pk>/cancel/", CancelRoleUpgradeRequestView.as_view()),
+    path("roles/grant-admin/", SuperAdminGrantAdminView.as_view(), name="grant-admin")
 ]
