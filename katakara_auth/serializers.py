@@ -82,11 +82,13 @@ class SignupSerializer(serializers.ModelSerializer):
             **validated_data
         )
 
-        # Fetch Role objects
+        # Fetch Role and Group objects
         role_objects = Role.objects.filter(name__in=roles)
+        group_objects = Group.objects.filter(name__in=roles)
 
-        # Assign roles (ManyToMany must be done after save)
+        # Assign roles and groups (ManyToMany must be done after save)
         user.role.set(role_objects)
+        user.groups.set(group_objects)
 
         return user
 

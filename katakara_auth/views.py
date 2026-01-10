@@ -223,11 +223,13 @@ class SuperAdminGrantAdminView(APIView):
 
         print("Step 3")
         admin_role, _ = Role.objects.get_or_create(name="admin")
+        admin_group = Group.objects.get(name="admin")
 
         print("step 4")
         try:
             with transaction.atomic():
                 user.role.set([admin_role])
+                user.groups.set([admin_group])
         except IntegrityError as e:
             raise Exception(f"ROLE ASSIGNMENT FAILED: {e}")
 
