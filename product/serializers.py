@@ -90,6 +90,26 @@ class ProductListSerializer(serializers.ModelSerializer):
             "created_at",
         ]
 
+        
+class MyProductListSerializer(serializers.ModelSerializer):
+    categories = serializers.SlugRelatedField(
+        source="category",
+        many=True,
+        read_only=True,
+        slug_field="slug"
+    )
+
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "name",
+            "price",
+            "status",
+            "categories",
+            "created_at",
+        ]
+
 
 class AdminProductListSerializer(serializers.ModelSerializer):
     seller = serializers.SerializerMethodField()

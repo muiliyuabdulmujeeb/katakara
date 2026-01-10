@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
-from .serializers import AdminProductListSerializer, ProductCreateSerializer, ProductDeleteSerializer, ProductDetailSerializer, ProductListSerializer, ProductModerationSerializer, ProductUpdateSerializer, CreateProductCategorySerializer
+from .serializers import AdminProductListSerializer, MyProductListSerializer, ProductCreateSerializer, ProductDeleteSerializer, ProductDetailSerializer, ProductListSerializer, ProductModerationSerializer, ProductUpdateSerializer, CreateProductCategorySerializer
 from .permissions import IsAdminOrSuperAdmin, IsProductOwner, IsSeller
 from .models import Product
 from .pagination import ProductPagination
@@ -55,6 +55,40 @@ class ProductListView(ListAPIView):
         min_price = self.request.query_params.get("min_price")
         max_price = self.request.query_params.get("max_price")
         search = self.request.query_params.get("search")
+
+        if category:
+            queryset = queryset.filter(category__slug=category)
+
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
+
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) |
+                Q(description__icontains=search)
+            )
+
+        return queryset.order_by("-created_at")
+    
+class MyProductListView(ListAPIView):
+    serializer_class = MyProductListSerializer
+    permission_classes = [IsSeller]
+    pagination_class = ProductPagination
+
+    def get_queryset(self):
+        queryset = Product.objects.filter(user_id= self.request.user)
+
+        category = self.request.query_params.get("category")
+        min_price = self.request.query_params.get("min_price")
+        max_price = self.request.query_params.get("max_price")
+        search = self.request.query_params.get("search")
+        status = self.request.query_params.get("status")
+
+        if status:
+            queryset = queryset.filter(status=status)
 
         if category:
             queryset = queryset.filter(category__slug=category)
