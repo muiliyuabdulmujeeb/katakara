@@ -1,4 +1,5 @@
 from django.db.models import Sum
+from decimal import Decimal
 from .models import UserCart, CartItems
 
 
@@ -61,21 +62,21 @@ def clear_cart(cart):
 def get_cart_summary(cart):
     items = (
         CartItems.objects
-        .select_related("product_id", "product_id__seller")
+        .select_related("product", "product__user")
         .filter(
             cart=cart,
-            product_id__is_approved=True,
-            product_id__is_blacklisted=False,
+            product__status="approved",
         )
     )
-    
+
     total_quantity = items.aggregate(
         total=Sum("quantity")
     )["total"] or 0
 
     subtotal = sum(
-        item.price * item.quantity for item in items
-    )
+    (item.price * item.quantity for item in items),
+    Decimal("0.00")
+)
 
     return {
         "id": cart.id,

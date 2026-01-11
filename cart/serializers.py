@@ -46,12 +46,12 @@ class CartItemSerializer(serializers.ModelSerializer):
         ]
 
     def get_product(self, obj):
-        product = obj.product_id
+        product = obj.product
         return {
             "id": product.id,
             "name": product.name,
             "price": str(product.price),
-            "seller": product.seller.username,
+            "seller": product.user.email,
         }
 
     def get_line_total(self, obj):
