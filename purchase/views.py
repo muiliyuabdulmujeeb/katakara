@@ -6,7 +6,7 @@ from rest_framework import status
 
 
 from .models import Order
-from .serializers import BuyerPaymentConfirmationSerializer, CreateOrderFromCartSerializer, OrderListSerializer, SellerConfirmPaymentSerializer, SellerRejectPaymentSerializer
+from .serializers import BuyerPaymentConfirmationSerializer, CreateOrderFromCartSerializer, OrderListSerializer, SellerConfirmPaymentSerializer, SellerRejectPaymentSerializer, OrderDetailSerializer
 from .services import create_order_from_cart, delete_order, get_order_for_request, get_user_order_by_id, get_user_orders, initiate_payment, save_order
 
 
@@ -44,6 +44,8 @@ class OrderDetailView(APIView):
                 {"detail": "Order not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
+        serializer = OrderDetailSerializer(order)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class SaveOrderView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
