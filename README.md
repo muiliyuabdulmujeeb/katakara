@@ -237,7 +237,7 @@ check .env.example file
 
 ---
 
-## Testing Strategy (Recommended)
+## Testing Strategy (To be implemented)
 
 - Unit tests for serializers
 - Integration tests for workflows
@@ -272,5 +272,3 @@ check .env.example file
 ## Final Note
 
 Katakara was designed **deliberately**, not rushed. Every feature follows **real-world e-commerce logic**, making the project easy to extend, debug, and scale.
-
-Also remember to change debug to false in settings.py when pushing to production
